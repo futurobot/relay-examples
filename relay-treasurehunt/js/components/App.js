@@ -11,6 +11,7 @@
  */
 
 import CheckHidingSpotForTreasureMutation from '../mutations/CheckHidingSpotForTreasureMutation';
+import RestartGameMutation from '../mutations/RestartGameMutation';
 import React from 'react';
 import Relay from 'react-relay';
 
@@ -48,6 +49,11 @@ class App extends React.Component {
       })
     );
   }
+  _restartGameClick(game) {
+    this.props.relay.commitUpdate(new RestartGameMutation({
+      game,
+    }))
+  }
   _hasFoundTreasure() {
     return (
       this.props.game.hidingSpots.edges.some(edge => edge.node.hasTreasure)
@@ -83,6 +89,7 @@ class App extends React.Component {
         <h1>{headerText}</h1>
         {this.renderGameBoard()}
         <p>Turns remaining: {this.props.game.turnsRemaining}</p>
+        <p><button onClick={this._restartGameClick.bind(this, this.props.game)}>Restart game</button></p>
       </div>
     );
   }
@@ -92,6 +99,7 @@ export default Relay.createContainer(App, {
   fragments: {
     game: () => Relay.QL`
       fragment on Game {
+        id,
         turnsRemaining,
         hidingSpots(first: 9) {
           edges {

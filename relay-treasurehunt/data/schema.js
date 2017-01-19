@@ -9,16 +9,7 @@
  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-
-import {
-  GraphQLBoolean,
-  GraphQLID,
-  GraphQLInt,
-  GraphQLNonNull,
-  GraphQLObjectType,
-  GraphQLSchema,
-} from 'graphql';
-
+import {GraphQLBoolean, GraphQLID, GraphQLInt, GraphQLNonNull, GraphQLObjectType, GraphQLSchema} from "graphql";
 import {
   connectionArgs,
   connectionDefinitions,
@@ -26,18 +17,18 @@ import {
   fromGlobalId,
   globalIdField,
   mutationWithClientMutationId,
-  nodeDefinitions,
-} from 'graphql-relay';
-
+  nodeDefinitions
+} from "graphql-relay";
 import {
   Game,
   HidingSpot,
+  resetGame,
   checkHidingSpotForTreasure,
   getGame,
   getHidingSpot,
   getHidingSpots,
-  getTurnsRemaining,
-} from './database';
+  getTurnsRemaining
+} from "./database";
 
 const {nodeInterface, nodeField} = nodeDefinitions(
   (globalId) => {
@@ -123,7 +114,7 @@ const queryType = new GraphQLObjectType({
 const CheckHidingSpotForTreasureMutation = mutationWithClientMutationId({
   name: 'CheckHidingSpotForTreasure',
   inputFields: {
-    id: { type: new GraphQLNonNull(GraphQLID) },
+    id: {type: new GraphQLNonNull(GraphQLID)},
   },
   outputFields: {
     hidingSpot: {
@@ -142,10 +133,25 @@ const CheckHidingSpotForTreasureMutation = mutationWithClientMutationId({
   },
 });
 
+const RestartGameMutation = mutationWithClientMutationId({
+  name: 'RestartGame',
+  outputFields: {
+    game: {
+      type: gameType,
+      resolve: () => getGame(),
+    },
+  },
+  mutateAndGetPayload: () => {
+    resetGame();
+    return getGame();
+  },
+});
+
 const mutationType = new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
     checkHidingSpotForTreasure: CheckHidingSpotForTreasureMutation,
+    restartGame: RestartGameMutation,
   }),
 });
 
